@@ -2,7 +2,8 @@
 from __future__ import with_statement
 import unittest
 from bottle import SimpleTemplate, TemplateError, view, template, touni, tob, html_quote
-import re, os
+import re
+import os
 import traceback
 from .tools import chdir
 
@@ -10,7 +11,8 @@ from .tools import chdir
 class TestSimpleTemplate(unittest.TestCase):
     def assertRenders(self, tpl, to, *args, **vars):
         if isinstance(tpl, str):
-            tpl = SimpleTemplate(tpl, lookup=[os.path.join(os.path.dirname(__file__), 'views')])
+            tpl = SimpleTemplate(
+                tpl, lookup=[os.path.join(os.path.dirname(__file__), 'views')])
         self.assertEqual(touni(to), tpl.render(*args, **vars))
 
     def test_string(self):
@@ -18,7 +20,8 @@ class TestSimpleTemplate(unittest.TestCase):
         self.assertRenders('start {{var}} end', 'start var end', var='var')
 
     def test_self_as_variable_name(self):
-        self.assertRenders('start {{self}} end', 'start var end', {'self':'var'})
+        self.assertRenders('start {{self}} end',
+                           'start var end', {'self': 'var'})
 
     def test_file(self):
         with chdir(__file__):
@@ -31,8 +34,10 @@ class TestSimpleTemplate(unittest.TestCase):
             self.assertRenders(t, 'start var end\n', var='var')
 
     def test_unicode(self):
-        self.assertRenders('start {{var}} end', 'start äöü end', var=touni('äöü'))
-        self.assertRenders('start {{var}} end', 'start äöü end', var=tob('äöü'))
+        self.assertRenders('start {{var}} end',
+                           'start äöü end', var=touni('äöü'))
+        self.assertRenders('start {{var}} end',
+                           'start äöü end', var=tob('äöü'))
 
     def test_unicode_code(self):
         """ Templates: utf8 code in file"""
@@ -55,14 +60,15 @@ class TestSimpleTemplate(unittest.TestCase):
         self.assertRenders('<{{var}}>', '<5>', var=5)
         self.assertRenders('<{{var}}>', '<b>', var=tob('b'))
         self.assertRenders('<{{var}}>', '<1.0>', var=1.0)
-        self.assertRenders('<{{var}}>', '<[1, 2]>', var=[1,2])
+        self.assertRenders('<{{var}}>', '<[1, 2]>', var=[1, 2])
 
     def test_htmlutils_quote(self):
-        self.assertEqual('"&lt;&#039;&#13;&#10;&#9;&quot;\\&gt;"', html_quote('<\'\r\n\t"\\>'));
+        self.assertEqual('"&lt;&#039;&#13;&#10;&#9;&quot;\\&gt;"',
+                         html_quote('<\'\r\n\t"\\>'))
 
     def test_escape(self):
         self.assertRenders('<{{var}}>', '<b>', var='b')
-        self.assertRenders('<{{var}}>', '<&lt;&amp;&gt;>',var='<&>')
+        self.assertRenders('<{{var}}>', '<&lt;&amp;&gt;>', var='<&>')
 
     def test_noescape(self):
         self.assertRenders('<{{!var}}>', '<b>',   var='b')
@@ -79,7 +85,7 @@ class TestSimpleTemplate(unittest.TestCase):
     def test_blocks(self):
         """ Templates: Code blocks and loops """
         t = "start\n%for i in l:\n{{i}} \n%end\nend"
-        self.assertRenders(t, 'start\n1 \n2 \n3 \nend', l=[1,2,3])
+        self.assertRenders(t, 'start\n1 \n2 \n3 \nend', l=[1, 2, 3])
         self.assertRenders(t, 'start\nend', l=[])
         t = "start\n%if i:\n{{i}} \n%end\nend"
         self.assertRenders(t, 'start\nTrue \nend', i=True)
@@ -135,7 +141,7 @@ class TestSimpleTemplate(unittest.TestCase):
     def test_onelineblocks(self):
         """ Templates: one line code blocks """
         t = "start\n%a=''\n%for i in l: a += str(i); end\n{{a}}\nend"
-        self.assertRenders(t, 'start\n123\nend', l=[1,2,3])
+        self.assertRenders(t, 'start\n123\nend', l=[1, 2, 3])
         self.assertRenders(t, 'start\n\nend', l=[])
 
     def test_escaped_codelines(self):
@@ -161,7 +167,7 @@ class TestSimpleTemplate(unittest.TestCase):
         """ Templates: %rebase and method passing """
         with chdir(__file__):
             t = SimpleTemplate(name='stpl_t2main', lookup=['./views/'])
-            result='+base+\n+main+\n!1234!\n+include+\n-main-\n+include+\n-base-\n'
+            result = '+base+\n+main+\n!1234!\n+include+\n-main-\n+include+\n-base-\n'
             self.assertRenders(t, result, content='1234')
 
     def test_get(self):
@@ -179,23 +185,29 @@ class TestSimpleTemplate(unittest.TestCase):
 
     def test_notfound(self):
         """ Templates: Unavailable templates"""
-        self.assertRaises(TemplateError, SimpleTemplate, name="abcdef", lookup=['.'])
+        self.assertRaises(TemplateError, SimpleTemplate,
+                          name="abcdef", lookup=['.'])
 
     def test_error(self):
         """ Templates: Exceptions"""
-        self.assertRaises(SyntaxError, lambda: SimpleTemplate('%for badsyntax').co)
-        self.assertRaises(IndexError, SimpleTemplate('{{i[5]}}', lookup=['.']).render, i=[0])
+        self.assertRaises(
+            SyntaxError, lambda: SimpleTemplate('%for badsyntax').co)
+        self.assertRaises(IndexError, SimpleTemplate(
+            '{{i[5]}}', lookup=['.']).render, i=[0])
 
     def test_winbreaks(self):
         """ Templates: Test windows line breaks """
         self.assertRenders('%var+=1\r\n{{var}}\r\n', '6\r\n', var=5)
 
     def test_winbreaks_end_bug(self):
-        d = { 'test': [ 1, 2, 3 ] }
+        d = {'test': [1, 2, 3]}
         self.assertRenders('%for i in test:\n{{i}}\n%end\n', '1\n2\n3\n', **d)
-        self.assertRenders('%for i in test:\n{{i}}\r\n%end\n', '1\r\n2\r\n3\r\n', **d)
-        self.assertRenders('%for i in test:\r\n{{i}}\n%end\r\n', '1\n2\n3\n', **d)
-        self.assertRenders('%for i in test:\r\n{{i}}\r\n%end\r\n', '1\r\n2\r\n3\r\n', **d)
+        self.assertRenders(
+            '%for i in test:\n{{i}}\r\n%end\n', '1\r\n2\r\n3\r\n', **d)
+        self.assertRenders(
+            '%for i in test:\r\n{{i}}\n%end\r\n', '1\n2\n3\n', **d)
+        self.assertRenders(
+            '%for i in test:\r\n{{i}}\r\n%end\r\n', '1\r\n2\r\n3\r\n', **d)
 
     def test_commentonly(self):
         """ Templates: Commentd should behave like code-lines (e.g. flush text-lines) """
@@ -218,6 +230,7 @@ class TestSimpleTemplate(unittest.TestCase):
             def test():
                 pass
             self.assertEqual(touni('hihi'), test())
+
             @view('aaa {{x}}', x='bbb')
             def test2():
                 pass
@@ -241,10 +254,13 @@ class TestSimpleTemplate(unittest.TestCase):
 class TestSTPLDir(unittest.TestCase):
     def fix_ident(self, string):
         lines = string.splitlines(True)
-        if not lines: return string
-        if not lines[0].strip(): lines.pop(0)
+        if not lines:
+            return string
+        if not lines[0].strip():
+            lines.pop(0)
         whitespace = re.match('([ \t]*)', lines[0]).group(0)
-        if not whitespace: return string
+        if not whitespace:
+            return string
         for i in range(len(lines)):
             lines[i] = lines[i][len(whitespace):]
         return lines[0][:0].join(lines)
@@ -258,7 +274,7 @@ class TestSTPLDir(unittest.TestCase):
             self.assertEqual(touni(result), tpl.render(*args, **vars))
         except SyntaxError:
             self.fail('Syntax error in template:\n%s\n\nTemplate code:\n##########\n%s\n##########' %
-                     (traceback.format_exc(), tpl.code))
+                      (traceback.format_exc(), tpl.code))
 
     def test_multiline_block(self):
         source = '''
@@ -266,7 +282,8 @@ class TestSTPLDir(unittest.TestCase):
             b = 6
             c = 7 %>
             {{a+b+c}}
-        '''; result = '''
+        '''
+        result = '''
             18
         '''
         self.assertRenders(source, result)
@@ -281,7 +298,8 @@ class TestSTPLDir(unittest.TestCase):
                # this is still code
                # lets end this %>
             {{x}}{{!y}}
-        '''; result = '''
+        '''
+        result = '''
             5%>
         '''
         self.assertRenders(source, result)
@@ -294,7 +312,8 @@ class TestSTPLDir(unittest.TestCase):
                x=5
                # lets end this here %>
             {{x}}
-        '''; result = '''
+        '''
+        result = '''
             5
         '''
         self.assertRenders(source, result)
@@ -319,7 +338,8 @@ class TestSTPLDir(unittest.TestCase):
                    a = 2
                  end %>
             {{a}}
-        '''; result = '''
+        '''
+        result = '''
             2
         '''
         self.assertRenders(source, result)
@@ -329,7 +349,8 @@ class TestSTPLDir(unittest.TestCase):
         source = '''
             cline eob=5; eob
             xxx
-        '''; result = '''
+        '''
+        result = '''
             xxx
         '''
         self.assertRenders(source, result, syntax='sob eob cline foo bar')
@@ -339,7 +360,8 @@ class TestSTPLDir(unittest.TestCase):
             % a = """line 1
                   line 2"""
             {{a}}
-        '''; result = '''
+        '''
+        result = '''
             line 1
                   line 2
         '''
@@ -356,7 +378,6 @@ class TestSTPLDir(unittest.TestCase):
         ''', result='''
             [1, 3, 5]
         ''')
-
 
     def test_end_keyword_on_same_line(self):
         self.assertRenders('''
