@@ -3,6 +3,7 @@ import bottle
 from .tools import ServerTestBase
 from bottle import response
 
+
 class TestAppMounting(ServerTestBase):
     def setUp(self):
         ServerTestBase.setUp(self)
@@ -67,6 +68,7 @@ class TestAppMounting(ServerTestBase):
 
     def test_mount_wsgi(self):
         status = {}
+
         def app(environ, start_response):
             start_response('200 OK', [('X-Test', 'WSGI')])
             return 'WSGI ' + environ['PATH_INFO']
@@ -76,7 +78,7 @@ class TestAppMounting(ServerTestBase):
         self.assertBody('WSGI /', '/test/')
         self.assertHeader('X-Test', 'WSGI', '/test/')
         self.assertBody('WSGI /test/bar', '/test/test/bar')
-            
+
     def test_mount_cookie(self):
         @self.subapp.route('/cookie')
         def test_cookie():
@@ -88,6 +90,7 @@ class TestAppMounting(ServerTestBase):
 
     def test_mount_wsgi_ctype_bug(self):
         status = {}
+
         def app(environ, start_response):
             start_response('200 OK', [('Content-Type', 'test/test')])
             return 'WSGI ' + environ['PATH_INFO']
@@ -114,6 +117,7 @@ class TestAppMerging(ServerTestBase):
     def setUp(self):
         ServerTestBase.setUp(self)
         self.subapp = bottle.Bottle()
+
         @self.subapp.route('/')
         @self.subapp.route('/test/:test')
         def test(test='foo'):

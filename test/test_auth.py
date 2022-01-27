@@ -2,6 +2,7 @@
 import bottle
 from .tools import ServerTestBase
 
+
 class TestBasicAuth(ServerTestBase):
 
     def test__header(self):
