@@ -13,6 +13,7 @@ def run_thread(func):
     t.start()
     t.join()
 
+
 class TestThreadLocals(unittest.TestCase):
     def test_request(self):
         e1 = {'PATH_INFO': '/t1'}
@@ -31,11 +32,12 @@ class TestThreadLocals(unittest.TestCase):
 
         def run():
             bottle.response.bind()
-            bottle.response.content_type='test/thread'
-            self.assertEqual(bottle.response.headers['Content-Type'], 'test/thread')
+            bottle.response.content_type = 'test/thread'
+            self.assertEqual(
+                bottle.response.headers['Content-Type'], 'test/thread')
 
         bottle.response.bind()
-        bottle.response.content_type='test/main'
+        bottle.response.content_type = 'test/main'
         self.assertEqual(bottle.response.headers['Content-Type'], 'test/main')
         run_thread(run)
         self.assertEqual(bottle.response.headers['Content-Type'], 'test/main')

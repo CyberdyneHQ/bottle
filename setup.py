@@ -4,7 +4,8 @@ import sys
 from setuptools import setup
 
 if sys.version_info < (2, 7):
-    raise NotImplementedError("Sorry, you need at least Python 2.7 or Python 3.6+ to use bottle.")
+    raise NotImplementedError(
+        "Sorry, you need at least Python 2.7 or Python 3.6+ to use bottle.")
 
 import bottle
 

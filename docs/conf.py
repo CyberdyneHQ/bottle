@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import bottle
 import sys
 import os
 import time
@@ -6,7 +7,6 @@ import time
 # Use the matching bottle version, not a globally installed one.
 bottle_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
 sys.path.insert(0, bottle_dir)
-import bottle
 
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx',
               'sphinx.ext.viewcode']
@@ -24,5 +24,3 @@ intersphinx_mapping = {'python': ('http://docs.python.org/', None),
 
 locale_dirs = ['_locale/']
 gettext_compact = False
-
-
