@@ -27,7 +27,6 @@ def my_decorator(func):
         return list(func(*a, **ka))[-1]
 
 
-
 class TestPluginManagement(tools.ServerTestBase):
 
     def verify_installed(self, plugin, otype, **config):
@@ -51,7 +50,7 @@ class TestPluginManagement(tools.ServerTestBase):
         self.assertRaises(TypeError, self.app.install, 'I am not a plugin')
 
     def test_uninstall_by_instance(self):
-        plugin  = self.app.install(MyPlugin())
+        plugin = self.app.install(MyPlugin())
         plugin2 = self.app.install(MyPlugin())
         self.app.uninstall(plugin)
         self.assertTrue(plugin not in self.app.plugins)
@@ -156,6 +155,7 @@ class TestPluginManagement(tools.ServerTestBase):
         @self.app.get('/return')
         def _():
             return HTTPResponse({'test': 'ko'}, 402)
+
         @self.app.get('/raise')
         def _():
             raise HTTPResponse({'test': 'ko2'}, 402)
@@ -168,9 +168,10 @@ class TestPluginAPI(tools.ServerTestBase):
 
     def setUp(self):
         super(TestPluginAPI, self).setUp()
+
         @self.app.route('/', test='plugin.cfg')
         def test(**args):
-            return ', '.join('%s:%s' % (k,v) for k,v in args.items())
+            return ', '.join('%s:%s' % (k, v) for k, v in args.items())
 
     def test_callable(self):
         def plugin(func):
@@ -180,24 +181,26 @@ class TestPluginAPI(tools.ServerTestBase):
         self.app.install(plugin)
         self.assertBody('test:me; tail', '/')
 
-
     def test_apply(self):
         class Plugin(object):
             def apply(self, func, route):
                 def wrapper(*a, **ka):
                     return func(test=route.config['test'], *a, **ka) + '; tail'
                 return wrapper
+
             def __call__(self, func):
-                raise AssertionError("Plugins must not be called "\
+                raise AssertionError("Plugins must not be called "
                                      "if they implement 'apply'")
         self.app.install(Plugin())
         self.assertBody('test:plugin.cfg; tail', '/')
 
     def test_instance_method_wrapper(self):
         class Plugin(object):
-            api=2
+            api = 2
+
             def apply(self, callback, route):
                 return self.b
+
             def b(self): return "Hello"
         self.app.install(Plugin())
         self.assertBody('Hello', '/')

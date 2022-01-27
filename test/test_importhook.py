@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import unittest
-import sys, os
+import sys
+import os
 import imp
+
 
 class TestImportHooks(unittest.TestCase):
 

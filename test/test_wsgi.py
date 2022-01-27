@@ -4,6 +4,7 @@ import bottle
 from .tools import ServerTestBase, chdir
 from bottle import tob, touni, HTTPResponse
 
+
 class TestWsgi(ServerTestBase):
     ''' Tests for WSGI functionality, routing and output casting (decorators) '''
 
@@ -62,7 +63,7 @@ class TestWsgi(ServerTestBase):
         """ 304 responses must not return entity headers """
         bad = ('allow', 'content-encoding', 'content-language',
                'content-length', 'content-md5', 'content-range',
-               'content-type', 'last-modified') # + c-location, expires?
+               'content-type', 'last-modified')  # + c-location, expires?
         for h in bad:
             bottle.response.set_header(h, 'foo')
         bottle.status = 304
@@ -106,12 +107,14 @@ class TestWsgi(ServerTestBase):
         header = 'öäü'
         if bottle.py3k:
             header = header.encode('utf8').decode('latin1')
+
         @bottle.route('/test')
         def test():
             h = bottle.request.get_header('X-Test')
             self.assertEqual(h, 'öäü')
             bottle.response.set_header('X-Test', h)
-        self.assertHeader('X-Test', header, '/test', env={'HTTP_X_TEST': header})
+        self.assertHeader('X-Test', header, '/test',
+                          env={'HTTP_X_TEST': header})
 
     def test_utf8_404(self):
         self.assertStatus(404, '/not-found/urf8-öäü')
@@ -121,23 +124,24 @@ class TestWsgi(ServerTestBase):
         @bottle.route('/')
         def test(): bottle.abort(401)
         self.assertStatus(401, '/')
+
         @bottle.error(401)
         def err(e):
             bottle.response.status = 200
             return str(type(e))
         self.assertStatus(200, '/')
-        self.assertBody("<class 'bottle.HTTPError'>",'/')
+        self.assertBody("<class 'bottle.HTTPError'>", '/')
 
     def test_303(self):
         """ WSGI: redirect (HTTP 303) """
         @bottle.route('/')
         def test(): bottle.redirect('/yes')
         @bottle.route('/one')
-        def test2(): bottle.redirect('/yes',305)
-        env = {'SERVER_PROTOCOL':'HTTP/1.1'}
+        def test2(): bottle.redirect('/yes', 305)
+        env = {'SERVER_PROTOCOL': 'HTTP/1.1'}
         self.assertStatus(303, '/', env=env)
         self.assertHeader('Location', 'http://127.0.0.1/yes', '/', env=env)
-        env = {'SERVER_PROTOCOL':'HTTP/1.0'}
+        env = {'SERVER_PROTOCOL': 'HTTP/1.0'}
         self.assertStatus(302, '/', env=env)
         self.assertHeader('Location', 'http://127.0.0.1/yes', '/', env=env)
         self.assertStatus(305, '/one', env=env)
@@ -148,6 +152,7 @@ class TestWsgi(ServerTestBase):
         def test():
             bottle.response.headers['Test-Header'] = 'test'
             yield 'foo'
+
         @bottle.route('/yield_nothing')
         def test2():
             yield
@@ -167,7 +172,8 @@ class TestWsgi(ServerTestBase):
         try:
             c = self.urlopen('/cookie')['header'].get_all('Set-Cookie', '')
         except:
-            c = self.urlopen('/cookie')['header'].get('Set-Cookie', '').split(',')
+            c = self.urlopen(
+                '/cookie')['header'].get('Set-Cookie', '').split(',')
             c = [x.strip() for x in c]
         self.assertTrue('b=b' in c)
         self.assertTrue('c=c; Path=/' in c)
@@ -217,7 +223,7 @@ class TestRouteDecorator(ServerTestBase):
         self.assertStatus(404, '/b')
 
     def test_path_list(self):
-        @bottle.route(['/a','/b'])
+        @bottle.route(['/a', '/b'])
         def test(): return 'ok'
         self.assertBody('ok', '/a')
         self.assertBody('ok', '/b')
@@ -243,7 +249,7 @@ class TestRouteDecorator(ServerTestBase):
         self.assertStatus(405, '/test', method='PUT')
 
     def test_method_list(self):
-        @bottle.route(method=['GET','post'])
+        @bottle.route(method=['GET', 'post'])
         def test(): return 'ok'
         self.assertBody('ok', '/test', method='GET')
         self.assertBody('ok', '/test', method='POST')
@@ -266,6 +272,7 @@ class TestRouteDecorator(ServerTestBase):
             def wrapper(*a, **ka):
                 return reversed(func(*a, **ka))
             return wrapper
+
         def titledec(func):
             def wrapper(*a, **ka):
                 return ''.join(func(*a, **ka)).title()
@@ -280,10 +287,12 @@ class TestRouteDecorator(ServerTestBase):
     def test_hooks(self):
         @bottle.route()
         def test():
-            return bottle.request.environ.get('hooktest','nohooks')
+            return bottle.request.environ.get('hooktest', 'nohooks')
+
         @bottle.hook('before_request')
         def hook():
             bottle.request.environ['hooktest'] = 'before'
+
         @bottle.hook('after_request')
         def hook(*args, **kwargs):
             bottle.response.headers['X-Hook'] = 'after'
@@ -370,9 +379,11 @@ class TestRouteDecorator(ServerTestBase):
         @bottle.route()
         def test1():
             return "test"
+
         @bottle.route()
         def test2():
             return HTTPResponse("test", 200)
+
         @bottle.route()
         def test3():
             raise HTTPResponse("test", 200)
@@ -408,8 +419,6 @@ class TestRouteDecorator(ServerTestBase):
         self.assertEqual(rv, test)
 
 
-
-
 class TestDecorators(ServerTestBase):
     ''' Tests Decorators '''
 
@@ -421,7 +430,8 @@ class TestDecorators(ServerTestBase):
             def test():
                 return dict(content='1234')
             result = '+base+\n+main+\n!1234!\n+include+\n-main-\n+include+\n-base-\n'
-            self.assertHeader('Content-Type', 'text/html; charset=UTF-8', '/tpl')
+            self.assertHeader(
+                'Content-Type', 'text/html; charset=UTF-8', '/tpl')
             self.assertBody(result, '/tpl')
 
     def test_view_error(self):
@@ -467,12 +477,12 @@ class TestDecorators(ServerTestBase):
         def c(x, y): pass
         def d(x, y=5): pass
         def e(x=5, y=6): pass
-        self.assertEqual(['/a'],list(bottle.yieldroutes(a)))
-        self.assertEqual(['/b/<x>'],list(bottle.yieldroutes(b)))
-        self.assertEqual(['/c/<x>/<y>'],list(bottle.yieldroutes(c)))
-        self.assertEqual(['/d/<x>','/d/<x>/<y>'],list(bottle.yieldroutes(d)))
-        self.assertEqual(['/e','/e/<x>','/e/<x>/<y>'],list(bottle.yieldroutes(e)))
-
+        self.assertEqual(['/a'], list(bottle.yieldroutes(a)))
+        self.assertEqual(['/b/<x>'], list(bottle.yieldroutes(b)))
+        self.assertEqual(['/c/<x>/<y>'], list(bottle.yieldroutes(c)))
+        self.assertEqual(['/d/<x>', '/d/<x>/<y>'], list(bottle.yieldroutes(d)))
+        self.assertEqual(['/e', '/e/<x>', '/e/<x>/<y>'],
+                         list(bottle.yieldroutes(e)))
 
 
 class TestAppShortcuts(ServerTestBase):

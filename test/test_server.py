@@ -31,41 +31,45 @@ def ping(server, port):
 
 class TestServer(unittest.TestCase):
     server = 'wsgiref'
-    skip   = False
+    skip = False
 
     def setUp(self):
         self.skip = self.skip or 'fast' in sys.argv
-        if self.skip: return
+        if self.skip:
+            return
         # Find a free port
         for port in range(8800, 8900):
             self.port = port
             # Start servertest.py in a subprocess
             cmd = [sys.executable, serverscript, self.server, str(port)]
-            cmd += sys.argv[1:] # pass cmdline arguments to subprocesses
+            cmd += sys.argv[1:]  # pass cmdline arguments to subprocesses
             self.p = Popen(cmd, stdout=PIPE, stderr=PIPE)
             # Wait for the socket to accept connections
             for i in range(100):
                 time.sleep(0.1)
                 # Accepts connections?
-                if ping('127.0.0.1', port): return
+                if ping('127.0.0.1', port):
+                    return
                 # Server died for some reason...
-                if not self.p.poll() is None: break
+                if not self.p.poll() is None:
+                    break
             rv = self.p.poll()
             if rv is None:
                 raise AssertionError("Server took too long to start up.")
-            if rv == 128: # Import error
+            if rv == 128:  # Import error
                 if os.environ.get('CI') != 'true' or \
                         os.environ.get('TRAVIS_PYTHON_VERSION') not in ('2.7', '3.6'):
                     tools.warn("Skipping %r test (ImportError)." % self.server)
                     self.skip = True
                     return
-            if rv == 3: # Port in use
+            if rv == 3:  # Port in use
                 continue
             raise AssertionError("Server exited with error code %d" % rv)
         raise AssertionError("Could not find a free port to test server.")
 
     def tearDown(self):
-        if self.skip: return
+        if self.skip:
+            return
 
         if self.p.poll() == None:
             os.kill(self.p.pid, signal.SIGINT)
@@ -79,10 +83,11 @@ class TestServer(unittest.TestCase):
             os.kill(self.p.pid, signal.SIGKILL)
             time.sleep(1)
 
-        lines = [line for stream in (self.p.stdout, self.p.stderr) for line in stream]
+        lines = [line for stream in (
+            self.p.stdout, self.p.stderr) for line in stream]
         for line in lines:
             if tob('warning') in line.lower():
-               tools.warn(line.strip().decode('utf8'))
+                tools.warn(line.strip().decode('utf8'))
             elif tob('error') in line.lower():
                 raise AssertionError(line.strip().decode('utf8'))
 
@@ -94,12 +99,13 @@ class TestServer(unittest.TestCase):
 
     def test_simple(self):
         ''' Test a simple static page with this server adapter. '''
-        if self.skip: return
+        if self.skip:
+            return
         self.assertEqual(tob('OK'), self.fetch('test'))
 
 
 blacklist = ['cgi', 'flup', 'gae', 'wsgiref']
-blacklist += ['fapws3', 'cherrypy', 'diesel'] # deprecated adapters
+blacklist += ['fapws3', 'cherrypy', 'diesel']  # deprecated adapters
 
 if sys.version_info.major == 2:
     blacklist += [

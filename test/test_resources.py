@@ -2,6 +2,7 @@ from bottle import ResourceManager
 import os.path
 import unittest
 
+
 class TestResourceManager(unittest.TestCase):
 
     def test_path_normalize(self):
@@ -12,7 +13,8 @@ class TestResourceManager(unittest.TestCase):
             self.assertEqual(rm.path, ['/foo/bar/'])
 
     def test_path_create(self):
-        import tempfile, shutil
+        import tempfile
+        import shutil
         tempdir = tempfile.mkdtemp()
         try:
             rm = ResourceManager()
