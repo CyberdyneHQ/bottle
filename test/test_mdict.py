@@ -1,6 +1,7 @@
 import unittest
 from bottle import MultiDict, HeaderDict
 
+
 class TestMultiDict(unittest.TestCase):
     def test_isadict(self):
         """ MultiDict should behaves like a normal dict """
@@ -20,7 +21,7 @@ class TestMultiDict(unittest.TestCase):
         self.assertEqual('key' in d, 'key' in m)
         self.assertEqual('cay' in d, 'cay' in m)
         self.assertRaises(KeyError, lambda: m['cay'])
-       
+
     def test_ismulti(self):
         """ MultiDict has some special features """
         m = MultiDict(a=5)
@@ -28,7 +29,7 @@ class TestMultiDict(unittest.TestCase):
         self.assertEqual([5, 6], m.getall('a'))
         self.assertEqual([], m.getall('b'))
         self.assertEqual([('a', 5), ('a', 6)], list(m.iterallitems()))
-   
+
     def test_isheader(self):
         """ HeaderDict replaces by default and title()s its keys """
         m = HeaderDict(abc_def=5)
@@ -36,8 +37,9 @@ class TestMultiDict(unittest.TestCase):
         self.assertEqual(['6'], m.getall('abc_def'))
         m.append('abc_def', 7)
         self.assertEqual(['6', '7'], m.getall('abc_def'))
-        self.assertEqual([('Abc-Def', '6'), ('Abc-Def', '7')], list(m.iterallitems()))
-    
+        self.assertEqual([('Abc-Def', '6'), ('Abc-Def', '7')],
+                         list(m.iterallitems()))
+
     def test_headergetbug(self):
         ''' Assure HeaderDict.get() to be case insensitive '''
         d = HeaderDict()

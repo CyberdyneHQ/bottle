@@ -13,6 +13,7 @@ try:
 except ImportError:
     USING_UJSON = False
 
+
 class TestOutputFilter(ServerTestBase):
     ''' Tests for WSGI functionality, routing and output casting (decorators) '''
 
@@ -65,13 +66,13 @@ class TestOutputFilter(ServerTestBase):
 
         @self.app.route('/')
         def test5():
-            bottle.response.content_type='text/html; charset=iso-8859-15'
+            bottle.response.content_type = 'text/html; charset=iso-8859-15'
             return touni('äöüß')
         self.assertBody(touni('äöüß').encode('iso-8859-15'))
 
         @self.app.route('/')
         def test5():
-            bottle.response.content_type='text/html'
+            bottle.response.content_type = 'text/html'
             return touni('äöüß')
         self.assertBody(touni('äöüß').encode('utf8'))
 
@@ -79,7 +80,7 @@ class TestOutputFilter(ServerTestBase):
         self.app.route('/')(lambda: {'a': 1})
 
         self.assertBody(bottle.json_dumps({'a': 1}))
-        self.assertHeader('Content-Type','application/json')
+        self.assertHeader('Content-Type', 'application/json')
 
     @unittest.skipIf(USING_UJSON, 'ujson do not throw exception in serialize')
     def test_json_serialization_error(self):
@@ -90,21 +91,20 @@ class TestOutputFilter(ServerTestBase):
         self.app.route('/')(lambda: {'a': set()})
 
         self.assertStatus(500)
-        self.assertHeader('Content-Type','text/html; charset=UTF-8')
-
+        self.assertHeader('Content-Type', 'text/html; charset=UTF-8')
 
     def test_json_HTTPResponse(self):
         self.app.route('/')(lambda: bottle.HTTPResponse({'a': 1}, 500))
 
         self.assertBody(bottle.json_dumps({'a': 1}))
-        self.assertHeader('Content-Type','application/json')
+        self.assertHeader('Content-Type', 'application/json')
 
     def test_json_HTTPError(self):
         self.app.error(400)(lambda e: e.body)
         self.app.route('/')(lambda: bottle.HTTPError(400, {'a': 1}))
 
         self.assertBody(bottle.json_dumps({'a': 1}))
-        self.assertHeader('Content-Type','application/json')
+        self.assertHeader('Content-Type', 'application/json')
 
     def test_generator_callback(self):
         @self.app.route('/')
@@ -169,6 +169,7 @@ class TestOutputFilter(ServerTestBase):
             def __init__(self, data):
                 self.data = data
                 self.closed = False
+
             def close(self):    self.closed = True
             def __iter__(self): return iter(self.data)
 
@@ -191,7 +192,8 @@ class TestOutputFilter(ServerTestBase):
         try:
             c = self.urlopen('/cookie')['header'].get_all('Set-Cookie', '')
         except:
-            c = self.urlopen('/cookie')['header'].get('Set-Cookie', '').split(',')
+            c = self.urlopen(
+                '/cookie')['header'].get('Set-Cookie', '').split(',')
             c = [x.strip() for x in c]
         self.assertTrue('b=b' in c)
         self.assertTrue('c=c; Path=/' in c)

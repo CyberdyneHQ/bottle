@@ -1,8 +1,10 @@
 import bottle
 from .tools import ServerTestBase
 
+
 class TestError(Exception):
     pass
+
 
 class TestAppException(ServerTestBase):
 
