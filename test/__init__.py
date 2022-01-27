@@ -1,7 +1,8 @@
 from __future__ import with_statement
 from .tools import chdir
 import unittest
-import sys, os
+import sys
+import os
 
 try:
     import coverage
@@ -16,4 +17,3 @@ if 'fast' in sys.argv:
 
 import bottle
 bottle.debug(True)
-

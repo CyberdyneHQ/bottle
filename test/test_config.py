@@ -21,8 +21,10 @@ class TestConfDict(unittest.TestCase):
         self.assertEqual('key' in d, 'key' in m)
         self.assertEqual('cay' in d, 'cay' in m)
         self.assertRaises(KeyError, lambda: m['cay'])
-        self.assertEqual(d.setdefault('key', "Val2"), m.setdefault('key', "Val2"))
-        self.assertEqual(d.setdefault('key', "Val3"), m.setdefault('key', "Val3"))
+        self.assertEqual(d.setdefault('key', "Val2"),
+                         m.setdefault('key', "Val2"))
+        self.assertEqual(d.setdefault('key', "Val3"),
+                         m.setdefault('key', "Val3"))
         self.assertEqual(d.get('key'), m.get('key'))
         with self.assertRaises(KeyError):
             del m['No key']
@@ -158,7 +160,8 @@ class TestConfDict(unittest.TestCase):
         root = ConfigDict()
         overlay = root._make_overlay()
         del overlay
-        import gc; gc.collect()
+        import gc
+        gc.collect()
         root._make_overlay()  # This triggers the weakref-collect
         self.assertEqual(len(root._overlays), 1)
 

@@ -1,5 +1,7 @@
 def main():
-    import sys, os, socket
+    import sys
+    import os
+    import socket
 
     test_root = os.path.dirname(os.path.abspath(__file__))
     os.chdir(test_root)
@@ -8,7 +10,7 @@ def main():
 
     try:
         server = sys.argv[1]
-        port   = int(sys.argv[2])
+        port = int(sys.argv[2])
 
         if server == 'gevent':
             from gevent import monkey

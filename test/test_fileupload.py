@@ -2,10 +2,12 @@
 ''' Tests for the FileUpload wrapper. '''
 
 import unittest
-import sys, os.path
+import sys
+import os.path
 import bottle
 from bottle import FileUpload, BytesIO, tob
 import tempfile
+
 
 class TestFileUpload(unittest.TestCase):
     def test_name(self):
@@ -21,7 +23,7 @@ class TestFileUpload(unittest.TestCase):
     def assertFilename(self, bad, good):
         fu = FileUpload(None, None, bad)
         self.assertEqual(fu.filename, good)
-        
+
     def test_filename(self):
         self.assertFilename('with space', 'with-space')
         self.assertFilename('with more  \t\n\r space', 'with-more-space')
